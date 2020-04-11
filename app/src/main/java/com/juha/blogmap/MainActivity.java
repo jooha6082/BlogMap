@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TMAP_API_KEY = "l7xx822771dc1c964fb7bc81be7f579a5e9c";
     private TMapView tmapview;
 
     @Override
@@ -27,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tmapview = new TMapView(this);
-        tmapview.setSKTMapApiKey(TMAP_API_KEY);
+        tmapview.setSKTMapApiKey(BuildConfig.TMAP_API_KEY);
         RelativeLayout relativeLayout = findViewById(R.id.relativelayout_tmap);
         relativeLayout.addView(tmapview);
 

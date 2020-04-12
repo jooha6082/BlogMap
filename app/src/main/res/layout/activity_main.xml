@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable
+            name = "activity"
+            type = "com.juha.blogmap.MainActivity" />
+    </data>
     <RelativeLayout
-        android:id="@+id/relativelayout_tmap"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></RelativeLayout>
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:id = "@+id/layoutTmap"
+            android:layout_width = "match_parent"
+            android:layout_height = "match_parent" />
 
-</LinearLayout>
+        <ImageButton
+            android:layout_width = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:src="@drawable/baseline_my_location_black_48dp"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:elevation="16dp"
+            android:id="@+id/btnCurLoc"
+            />
+
+
+    </RelativeLayout>
+</layout>
+

@@ -30,6 +30,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SearchBlog searchBlog = new SearchBlog("페어링룸");
+        searchBlog.execute();
+
+    }
+
     private void initInstances(){
         tmapview = new TMapView(this);
         tmapview.setSKTMapApiKey(TMAP_API_KEY);

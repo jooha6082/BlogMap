@@ -4,13 +4,19 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import com.juha.blogmap.databinding.ActivityMainBinding;
+import com.skt.Tmap.TMapData;
+import com.skt.Tmap.TMapPOIItem;
+import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         initInstances();
         eventListeners();
+        findRestaurants();
+
 
     }
 
@@ -80,4 +88,19 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    public void findRestaurants() {
+        TMapData tMapData = new TMapData();
+        TMapPoint tMapPoint = tmapview.getCenterPoint();
+        tMapData.findAroundNamePOI(tMapPoint, "맛집", 1, 99, new TMapData.FindAroundNamePOIListenerCallback() {
+            @Override
+            public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
+                for (int i = 0; i < arrayList.size(); i++) {
+                    TMapPOIItem tMapPOIItem = arrayList.get(i);
+                        Log.d("맛집", "POI Name: " + tMapPOIItem.getPOIName());
+
+                }
+            }
+        });
+    }
+
 }

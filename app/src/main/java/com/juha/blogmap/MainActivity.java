@@ -17,6 +17,9 @@ import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,19 +91,27 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-    public void findRestaurants() {
+    public HashMap<String, String> findRestaurants() {
         TMapData tMapData = new TMapData();
         TMapPoint tMapPoint = tmapview.getCenterPoint();
-        tMapData.findAroundNamePOI(tMapPoint, "맛집", 1, 99, new TMapData.FindAroundNamePOIListenerCallback() {
+        final HashMap<String, String> searchList = new LinkedHashMap<>();;
+        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 99, new TMapData.FindAroundNamePOIListenerCallback() {
             @Override
             public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
                 for (int i = 0; i < arrayList.size(); i++) {
                     TMapPOIItem tMapPOIItem = arrayList.get(i);
-                        Log.d("맛집", "POI Name: " + tMapPOIItem.getPOIName());
-
+                    if (!searchList.containsKey(tMapPOIItem.getPOIID())){
+                        searchList.put(tMapPOIItem.getPOIID(), tMapPOIItem.getPOIName());
+                    }
+                    Log.d("식음료", "POI Name: " + tMapPOIItem.getPOIID() + "  " + tMapPOIItem.getPOIName());
+                }
+                Log.d("===============", "=============================================================");
+                for (Map.Entry<String, String> entry: searchList.entrySet()){
+                    Log.d("식음료", entry.getKey() + " " + entry.getValue());
                 }
             }
         });
+        return searchList;
     }
 
 }

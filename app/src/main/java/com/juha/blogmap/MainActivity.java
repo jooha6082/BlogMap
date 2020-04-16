@@ -1,24 +1,35 @@
 package com.juha.blogmap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.juha.blogmap.databinding.ActivityMainBinding;
 import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapMarkerItem;
 import com.skt.Tmap.TMapPOIItem;
 import com.skt.Tmap.TMapPoint;
+import com.skt.Tmap.TMapTapi;
 import com.skt.Tmap.TMapView;
 
 import org.jsoup.Jsoup;
@@ -27,6 +38,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,15 +52,24 @@ public class MainActivity extends AppCompatActivity {
     SearchBlog searchBlog;
     HashMap<String, Integer> data = new HashMap<>();
     String TMAP_API_KEY = "l7xx822771dc1c964fb7bc81be7f579a5e9c";
+    AutocompleteSupportFragment autocompleteFragment;
+    String searchedPlace = "";
+    LatLng searchedLatLng;
+    String TAG = "MainActivityT";
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         binding.setActivity(this);
 
+
         initInstances();
         eventListeners();
-        findRestaurants();
+
     }
 
     @Override
@@ -62,10 +83,14 @@ public class MainActivity extends AppCompatActivity {
         tmapview.setSKTMapApiKey(TMAP_API_KEY);
         binding.layoutTmap.addView(tmapview);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        tmapview.setZoomLevel(16);
+
 
     }
     private void eventListeners(){
         binding.btnCurLoc.setOnClickListener(onClickListener);
+        binding.btnFind.setOnClickListener(onClickListener);
+        binding.btnSearch.setOnClickListener(onClickListener);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -80,6 +105,27 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     break;
+                case R.id.btnFind:
+                    try{
+                        tmapview.setMapPosition(tmapview.POSITION_DEFAULT);
+                        findRestaurants();
+
+                    }catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                case R.id.btnSearch:
+
+                    if (!searchedPlace.equals("")){
+
+                        tmapview.moveTo();
+
+                        searchedPlace = "";
+                        searchedLatLng = null;
+                        autocompleteFragment.setText("");
+                    } else {
+                        Toast.makeText(MainActivity.this, "Please search a city name", Toast.LENGTH_SHORT).show();
+                    }
+                break;
             }
         }
     };
@@ -111,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         TMapData tMapData = new TMapData();
         TMapPoint tMapPoint = tmapview.getCenterPoint();
         final HashMap<String, TMapPOIItem> searchList = new LinkedHashMap<>();
-        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 99, new TMapData.FindAroundNamePOIListenerCallback() {
+        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 1000, new TMapData.FindAroundNamePOIListenerCallback() {
             @Override
             public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
                 for (int i = 0; i < arrayList.size(); i++) {
@@ -128,6 +174,29 @@ public class MainActivity extends AppCompatActivity {
                     searchBlog.execute();
 
                 }
+            }
+        });
+    }
+    private void setupAutocompleteFrag(){
+        // Initialize the AutocompleteSupportFragment.
+        autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG));
+        autocompleteFragment.setTypeFilter(TypeFilter.REGIONS);
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                searchedPlace = place.getName();
+                searchedLatLng = place.getLatLng();
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.i(TAG, "An error occurred: " + status);
             }
         });
     }
@@ -180,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
             tmapview.addMarkerItem(query.getPOIID(), tMapMarkerItem);
 
         }
+
     }
 
 }

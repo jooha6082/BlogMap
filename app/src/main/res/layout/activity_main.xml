@@ -14,18 +14,58 @@
             android:layout_width = "match_parent"
             android:layout_height = "match_parent" />
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <fragment android:id="@+id/autocomplete_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@id/border1"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+                />
+            <Space
+                android:layout_width = "wrap_content"
+                android:layout_height = "wrap_content"
+                android:layout_alignStart="@id/btnSearch"
+                android:id="@+id/border1"/>
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:background="@null"
+                android:gravity="center"
+                android:scaleType="fitCenter"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_launcher_background"
+                android:id="@+id/btnSearch"/>
+        </RelativeLayout>
+
+
+        <ImageButton
+        android:layout_width = "wrap_content"
+        android:layout_height = "wrap_content"
+        android:src="@drawable/baseline_my_location_black_48dp"
+        android:background="@android:color/transparent"
+        android:padding="8dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:elevation="16dp"
+        android:id="@+id/btnCurLoc"
+        />
+
         <ImageButton
             android:layout_width = "wrap_content"
             android:layout_height = "wrap_content"
-            android:src="@drawable/baseline_my_location_black_48dp"
+            android:src="@mipmap/ic_launcher"
             android:background="@android:color/transparent"
             android:padding="8dp"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:elevation="16dp"
-            android:id="@+id/btnCurLoc"
+            android:id="@+id/btnFind"
+            android:layout_toLeftOf="@+id/btnCurLoc"
             />
-
 
     </RelativeLayout>
 </layout>

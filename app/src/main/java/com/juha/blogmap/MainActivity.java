@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnCurLoc.setOnClickListener(onClickListener);
         binding.btnFind.setOnClickListener(onClickListener);
         binding.btnSearch.setOnClickListener(onClickListener);
+        tmapview.setOnCalloutRightButtonClickListener(onCalloutRightButtonClickCallback);
     }
 
     View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -132,8 +133,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.btnFind:
+                    tmapview.removeAllMarkerItem();
                     try{
-                        tmapview.setMapPosition(tmapview.POSITION_DEFAULT);
+                        tmapview.setMapPosition(TMapView.POSITION_DEFAULT);
                         findRestaurants();
 
                     }catch (SecurityException e) {
@@ -174,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         TMapData tMapData = new TMapData();
         TMapPoint tMapPoint = tmapview.getCenterPoint();
         final HashMap<String, TMapPOIItem> searchList = new LinkedHashMap<>();
-        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 1000, new TMapData.FindAroundNamePOIListenerCallback() {
+        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 20, new TMapData.FindAroundNamePOIListenerCallback() {
             @Override
             public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
                 for (int i = 0; i < arrayList.size(); i++) {
@@ -194,6 +196,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    TMapView.OnCalloutRightButtonClickCallback onCalloutRightButtonClickCallback = new TMapView.OnCalloutRightButtonClickCallback() {
+        @Override
+        public void onCalloutRightButton(TMapMarkerItem tMapMarkerItem) {
+            Intent myWebLink = new Intent(android.content.Intent.ACTION_VIEW);
+//            Log.i(TAG, tMapMarkerItem.getID());
+            myWebLink.setData(Uri.parse(tMapMarkerItem.getID()));
+            startActivity(myWebLink);
+        }
+    };
 
     private class SearchBlog extends AsyncTask<Void, Void, Integer> {
 
@@ -235,13 +246,20 @@ public class MainActivity extends AppCompatActivity {
             tMapMarkerItem.setTMapPoint(query.getPOIPoint());
             tMapMarkerItem.setName(query.getPOIName());
             tMapMarkerItem.setVisible(TMapMarkerItem.VISIBLE);
+            String url = "https://search.naver.com/search.naver?where=post&sm=tab_jum&query=" + query.getPOIName();
 
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.round_room_black_24dp);
             tMapMarkerItem.setIcon(bitmap);
             tMapMarkerItem.setPosition(0.5f, 1.0f);
 
-            tmapview.addMarkerItem(query.getPOIID(), tMapMarkerItem);
+            tMapMarkerItem.setCalloutTitle(query.getPOIName());
+            tMapMarkerItem.setCalloutSubTitle("블로그 갯수: " + integer + "개");
+            tMapMarkerItem.setCanShowCallout(true);
+//            tMapMarkerItem.setAutoCalloutVisible(true);
+            Bitmap bitmapRightClick = BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_keyboard_arrow_right_white_18dp);
+            tMapMarkerItem.setCalloutRightButtonImage(bitmapRightClick);
 
+            tmapview.addMarkerItem(url, tMapMarkerItem);
         }
 
     }

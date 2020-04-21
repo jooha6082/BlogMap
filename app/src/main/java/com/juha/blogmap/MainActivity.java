@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
@@ -44,6 +45,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -58,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
     String GOOGLE_API_KEY = "AIzaSyDlBb2UlhTGRoMKo6M7MZ9-HpK1eA7wlKQ";
     AutocompleteSupportFragment autocompleteFragment;
     String searchedPlace = "";
-    double searchedLat;
-    double searchedLng;
+    double searchedLat = 0;
+    double searchedLng = 0;
     String TAG = "MainActivityT";
 
 
@@ -95,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        assert autocompleteFragment != null;
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -103,6 +106,11 @@ public class MainActivity extends AppCompatActivity {
                 searchedPlace = place.getName();
                 searchedLat = place.getLatLng().latitude;
                 searchedLng = place.getLatLng().longitude;
+                System.out.println("Searched Latitude: " + searchedLat);
+                System.out.println("Searched Longitude: " + searchedLng);
+
+                tmapview.setCenterPoint((float) searchedLat, (float) searchedLng,true);
+                tmapview.getCenterPoint();
             }
 
             @Override
@@ -141,10 +149,13 @@ public class MainActivity extends AppCompatActivity {
                     }catch (SecurityException e) {
                         e.printStackTrace();
                     }
+                    break;
                 case R.id.btnSearch:
-
-
-                break;
+                    try {
+                    }catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                    break;
             }
         }
     };

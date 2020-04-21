@@ -106,11 +106,8 @@ public class MainActivity extends AppCompatActivity {
                 searchedPlace = place.getName();
                 searchedLat = place.getLatLng().latitude;
                 searchedLng = place.getLatLng().longitude;
-                System.out.println("Searched Latitude: " + searchedLat);
-                System.out.println("Searched Longitude: " + searchedLng);
 
-                tmapview.setCenterPoint((float) searchedLat, (float) searchedLng,true);
-                tmapview.getCenterPoint();
+                tmapview.setCenterPoint((float) searchedLng, (float) searchedLat,true);
             }
 
             @Override
@@ -187,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         TMapData tMapData = new TMapData();
         TMapPoint tMapPoint = tmapview.getCenterPoint();
         final HashMap<String, TMapPOIItem> searchList = new LinkedHashMap<>();
-        tMapData.findAroundNamePOI(tMapPoint, "식음료", 1, 20, new TMapData.FindAroundNamePOIListenerCallback() {
+        tMapData.findAroundNamePOI(tMapPoint, "맛집", 1, 90, new TMapData.FindAroundNamePOIListenerCallback() {
             @Override
             public void onFindAroundNamePOI(ArrayList<TMapPOIItem> arrayList) {
                 for (int i = 0; i < arrayList.size(); i++) {
@@ -197,9 +194,11 @@ public class MainActivity extends AppCompatActivity {
                     }
 //                    Log.d("식음료", "POI Name: " + tMapPOIItem.getPOIID() + "  " + tMapPOIItem.getPOIName());
                 }
-//                Log.d("===============", "=============================================================");
+                Log.d("===============", "=============================================================");
                 for (Map.Entry<String, TMapPOIItem> entry: searchList.entrySet()){
-                    Log.d("식음료", entry.getKey() + " " + entry.getValue());
+//                    Log.d("식음료", entry.getKey() + " " + entry.getValue());
+//                    Log.d("식음료", "POI Name: " + entry.getValue().getPOIID() + "  " + entry.getValue().getPOIName());
+
                     searchBlog = new SearchBlog(entry.getValue());
                     searchBlog.execute();
 
@@ -221,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
         String TAG = "SearchBlogT";
         private TMapPOIItem query;
+        private String search;
 
         public SearchBlog(TMapPOIItem place) {
             this.query = place;
@@ -229,8 +229,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Void... voids) {
             int result = 0;
+            search = query.getPOIName();
+            search = concatName(search);
+
+            Log.i(TAG, "Original: " + query.getPOIName() + " --->  changed: " + search);
+            Log.i(TAG, "===============");
+
             try {
-                String url = "https://search.naver.com/search.naver?where=post&sm=tab_jum&query=" + query.getPOIName();
+                String url = "https://search.naver.com/search.naver?where=post&sm=tab_jum&query=" + search;
 
                 Document doc = Jsoup.connect(url).get();
                 Elements contents = doc.select("div.blog.section._blogBase._prs_blg > div > span");
@@ -251,28 +257,51 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Integer integer) {
             Log.i(TAG, String.valueOf(integer));
 
-//            TODO: put markers on the map
-            TMapMarkerItem tMapMarkerItem = new TMapMarkerItem();
+            if (integer > 0){
+                TMapMarkerItem tMapMarkerItem = new TMapMarkerItem();
 
-            tMapMarkerItem.setTMapPoint(query.getPOIPoint());
-            tMapMarkerItem.setName(query.getPOIName());
-            tMapMarkerItem.setVisible(TMapMarkerItem.VISIBLE);
-            String url = "https://search.naver.com/search.naver?where=post&sm=tab_jum&query=" + query.getPOIName();
+                tMapMarkerItem.setTMapPoint(query.getPOIPoint());
+                tMapMarkerItem.setName(query.getPOIName());
+                tMapMarkerItem.setVisible(TMapMarkerItem.VISIBLE);
+                String url = "https://search.naver.com/search.naver?where=post&sm=tab_jum&query=" + search;
 
-            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.round_room_black_24dp);
-            tMapMarkerItem.setIcon(bitmap);
-            tMapMarkerItem.setPosition(0.5f, 1.0f);
+                Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.round_room_black_24dp);
+                tMapMarkerItem.setIcon(bitmap);
+                tMapMarkerItem.setPosition(0.5f, 1.0f);
 
-            tMapMarkerItem.setCalloutTitle(query.getPOIName());
-            tMapMarkerItem.setCalloutSubTitle("블로그 갯수: " + integer + "개");
-            tMapMarkerItem.setCanShowCallout(true);
+                tMapMarkerItem.setCalloutTitle(search);
+                tMapMarkerItem.setCalloutSubTitle("블로그 갯수: " + integer + "개");
+                tMapMarkerItem.setCanShowCallout(true);
 //            tMapMarkerItem.setAutoCalloutVisible(true);
-            Bitmap bitmapRightClick = BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_keyboard_arrow_right_white_18dp);
-            tMapMarkerItem.setCalloutRightButtonImage(bitmapRightClick);
+                Bitmap bitmapRightClick = BitmapFactory.decodeResource(context.getResources(), R.drawable.baseline_keyboard_arrow_right_white_18dp);
+                tMapMarkerItem.setCalloutRightButtonImage(bitmapRightClick);
 
-            tmapview.addMarkerItem(url, tMapMarkerItem);
+                tmapview.addMarkerItem(url, tMapMarkerItem);
+            }
+
         }
 
+    }
+
+    //
+    private String concatName(String name){
+        int a = name.indexOf("[");
+        int b = name.indexOf("]");
+        if (a != -1 && b != -1){
+            String h = name.substring(a, b + 1);
+            name = name.replace(h, "");
+        }
+        String[] hold = name.split(" ");
+
+        String last = hold[hold.length - 1];
+        String[] c = last.split("");
+//            Log.i(TAG, String.valueOf(search.length()));
+//            Log.i(TAG, search);
+        if (c[c.length - 1].equals("점") && name.length() > (last.length() + 1)){
+            name = name.substring(0, name.length() - last.length() - 1);
+//                Log.i(TAG, "Last Search: " + search);
+        }
+        return name;
     }
 
 }
